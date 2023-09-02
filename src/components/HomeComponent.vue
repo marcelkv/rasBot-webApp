@@ -63,6 +63,8 @@ export default {
       font-size: 25px;
       text-align: center;
       width: calc(100% - 40px);
+      height: 40px;
+      font-size: 24px;
     }
   }
 }
