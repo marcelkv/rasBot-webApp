@@ -35,8 +35,9 @@
 </template>
 
 <script lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, inject, onMounted, ref } from "vue";
 import SpinnerComponent from "@/common/components/SpinnerComponent.vue";
+import { IClientService } from "@/common/services/IClientService";
 
 export default {
   components: {
@@ -47,6 +48,8 @@ export default {
     const canRemoveError = ref(false);
     const textInput = ref("");
     const isValidating = ref(false);
+
+    const clientService = inject<IClientService>("clientService");
 
     const canConnect = computed(() => {
       return textInput.value.length > 3;
@@ -64,8 +67,11 @@ export default {
         return;
       }
 
-      const isRobotIdValid = await isRobotIdValidAsync();
-
+      isValidating.value = true;
+      const isRobotIdValid = await clientService?.isRobotIdValidAsync(
+        textInput.value
+      );
+      isValidating.value = false;
       if (!isRobotIdValid) {
         setStateForInvalidRobotId();
         return;
@@ -84,17 +90,6 @@ export default {
 
       hasError.value = false;
       canRemoveError.value = false;
-    }
-
-    async function isRobotIdValidAsync(): Promise<boolean> {
-      isValidating.value = true;
-      await new Promise((resolve) => {
-        setTimeout(() => {
-          resolve("");
-        }, 2000); // 1000 milliseconds = 1 second
-      });
-      isValidating.value = false;
-      return textInput.value.startsWith("a");
     }
 
     return {
