@@ -33,6 +33,6 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: black;
+  background-color: #242625;
 }
 </style>
