@@ -26,9 +26,47 @@
         />
       </div>
     </div>
-    <div v-if="hasError" class="errorSection">
-      <div class="errorWrapper" v-bind:class="{ isErrorReady: canRemoveError }">
-        ERROR!
+    <div
+      v-if="hasError"
+      class="errorSection"
+      v-bind:class="{
+        largeError: !hasInternetConnectionError,
+      }"
+    >
+      <div
+        class="errorWrapper"
+        v-bind:class="{
+          isErrorReady: canRemoveError,
+        }"
+      >
+        <div v-if="hasInternetConnectionError" class="connectionError">
+          <div class="errorTitleItem">
+            Oops! It seems you're currently offline.
+          </div>
+          <div class="errorSecondaryItem center">
+            Please check your internet connection and try again.
+          </div>
+        </div>
+        <div v-else class="connectionError">
+          <div class="errorTitleItem">
+            Cannot establish a connection to RasBot.
+          </div>
+          <div class="errorSecondaryItem">
+            Possible reasons for the connection issue:
+          </div>
+          <div class="errorSecondaryItem">
+            1. Please check if the RobotId is correct.
+          </div>
+          <div class="errorSecondaryItem">
+            2. Ensure that RasBot is turned on.
+          </div>
+          <div class="errorSecondaryItem">
+            3. Make sure RasBot is connected to the internet.
+          </div>
+          <div class="errorSecondaryItem">
+            Please verify these steps to resolve the connection problem.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -45,6 +83,7 @@ export default {
   },
   setup() {
     const hasError = ref(false);
+    const hasInternetConnectionError = ref(false);
     const canRemoveError = ref(false);
     const textInput = ref("");
     const isValidating = ref(false);
@@ -67,15 +106,29 @@ export default {
         return;
       }
 
-      isValidating.value = true;
-      const isRobotIdValid = await clientService?.isRobotIdValidAsync(
-        textInput.value
-      );
-      isValidating.value = false;
+      const isRobotIdValid = await isRobotIdValidAsync();
+
       if (!isRobotIdValid) {
         setStateForInvalidRobotId();
         return;
       }
+    }
+
+    async function isRobotIdValidAsync(): Promise<boolean> {
+      isValidating.value = true;
+      hasInternetConnectionError.value = false;
+      let isRobotIdValid = false;
+
+      try {
+        isRobotIdValid = await clientService?.isRobotIdValidAsync(
+          textInput.value
+        );
+      } catch (e) {
+        hasInternetConnectionError.value = true;
+      }
+
+      isValidating.value = false;
+      return isRobotIdValid;
     }
 
     function setStateForInvalidRobotId(): void {
@@ -94,6 +147,7 @@ export default {
 
     return {
       hasError,
+      hasInternetConnectionError,
       canRemoveError,
       textInput,
       canConnect,
@@ -193,6 +247,10 @@ export default {
     backdrop-filter: blur(8px);
     --errorWrapperHeight: 140px;
 
+    &.largeError {
+      --errorWrapperHeight: 220px;
+    }
+
     .errorWrapper {
       position: relative;
       display: flex;
@@ -209,6 +267,35 @@ export default {
       &.isErrorReady {
         top: calc((100% / 2) - (var(--errorWrapperHeight) / 2));
         transition: top 1s;
+      }
+
+      .connectionError {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        justify-content: center;
+
+        .errorTitleItem {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 6px;
+          width: 100%;
+          display: flex;
+          justify-content: center;
+        }
+
+        .errorSecondaryItem {
+          margin-top: 8px;
+          margin-left: 20px;
+          margin-right: 20px;
+          font-size: 16px;
+          display: flex;
+
+          &.center {
+            justify-content: center;
+          }
+        }
       }
     }
   }
