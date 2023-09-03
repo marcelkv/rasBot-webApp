@@ -15,9 +15,15 @@
       <div
         class="submitButton inputSection"
         v-bind:class="{ canConnect: canConnect }"
-        v-on:click="onClick()"
+        v-on:click="onClickConnect()"
       >
-        Connect
+        <div v-if="!isValidating" class="connectMsg">Connect</div>
+        <SpinnerComponent
+          v-else
+          class="spinner"
+          v-bind:is-loading="isValidating"
+          v-bind:spinner-size="'20px'"
+        />
       </div>
     </div>
     <div class="errorSection" v-bind:class="{ hasError: hasError }">
@@ -28,26 +34,38 @@
 
 <script lang="ts">
 import { computed, ref } from "vue";
+import SpinnerComponent from "@/common/components/SpinnerComponent.vue";
 
 export default {
+  components: {
+    SpinnerComponent,
+  },
   setup() {
     const hasError = ref(false);
     const canRemoveError = ref(false);
     const textInput = ref("");
+    const isValidating = ref(false);
+
     const canConnect = computed(() => {
       return textInput.value.length > 3;
     });
 
-    function onClick(): void {
+    async function onClickConnect(): Promise<void> {
       if (!canConnect.value) {
         return;
       }
 
-      if (!isRobotIdValid()) {
-        hasError.value = true;
-        setTimeout(() => (canRemoveError.value = true), 500);
+      const isRobotIdValid = await isRobotIdValidAsync();
+
+      if (!isRobotIdValid) {
+        setStateForInvalidRobotId();
         return;
       }
+    }
+
+    function setStateForInvalidRobotId(): void {
+      hasError.value = true;
+      setTimeout(() => (canRemoveError.value = true), 500);
     }
 
     function onClickHome(): void {
@@ -59,7 +77,14 @@ export default {
       canRemoveError.value = false;
     }
 
-    function isRobotIdValid(): boolean {
+    async function isRobotIdValidAsync(): Promise<boolean> {
+      isValidating.value = true;
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve("");
+        }, 2000); // 1000 milliseconds = 1 second
+      });
+      isValidating.value = false;
       return textInput.value.startsWith("a");
     }
 
@@ -67,7 +92,8 @@ export default {
       hasError,
       textInput,
       canConnect,
-      onClick,
+      isValidating,
+      onClickConnect,
       onClickHome,
     };
   },
