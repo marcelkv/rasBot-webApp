@@ -217,6 +217,10 @@ export default {
       color: white;
     }
 
+    input::placeholder {
+      color: white;
+    }
+
     .inputBox {
       text-align: center;
       box-sizing: border-box;
