@@ -176,7 +176,7 @@ export default {
     justify-content: center;
     overflow: hidden;
 
-    @media screen and (max-width: 768px) and (orientation: landscape) {
+    @media screen and (height: 500px) and (orientation: landscape) {
       flex-grow: 1;
       z-index: 0;
     }
@@ -186,6 +186,7 @@ export default {
       max-height: 100%;
       width: auto;
       height: auto;
+      object-fit: cover;
     }
   }
 
@@ -198,7 +199,7 @@ export default {
     justify-content: center;
     --itemWidth: calc(100% - 40px);
 
-    @media screen and (max-width: 768px) and (orientation: landscape) {
+    @media screen and (max-height: 500px) and (orientation: landscape) {
       flex-grow: 1;
       position: absolute;
       height: 100%;
