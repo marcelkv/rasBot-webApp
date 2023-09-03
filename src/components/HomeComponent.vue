@@ -26,8 +26,10 @@
         />
       </div>
     </div>
-    <div class="errorSection" v-bind:class="{ hasError: hasError }">
-      <div class="errorWrapper">ERROR!</div>
+    <div v-if="hasError" class="errorSection">
+      <div class="errorWrapper" v-bind:class="{ isErrorReady: canRemoveError }">
+        ERROR!
+      </div>
     </div>
   </div>
 </template>
@@ -65,7 +67,7 @@ export default {
 
     function setStateForInvalidRobotId(): void {
       hasError.value = true;
-      setTimeout(() => (canRemoveError.value = true), 500);
+      setTimeout(() => (canRemoveError.value = true), 200);
     }
 
     function onClickHome(): void {
@@ -90,6 +92,7 @@ export default {
 
     return {
       hasError,
+      canRemoveError,
       textInput,
       canConnect,
       isValidating,
@@ -178,22 +181,18 @@ export default {
   }
 
   .errorSection {
+    z-index: 2;
     position: absolute;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
+    background-color: rgba(201, 36, 36, 0.7);
+    backdrop-filter: blur(8px);
     --errorWrapperHeight: 140px;
-    top: -100%;
-    transition: top 0.5s;
-    z-index: 2;
-
-    &.hasError {
-      top: calc(100% / 2 - (var(--errorWrapperHeight) / 2));
-      transition: top 1s;
-    }
 
     .errorWrapper {
+      position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -201,8 +200,14 @@ export default {
       color: white;
       width: 100%;
       max-width: var(--maxSectionWidth);
-      border-radius: 4px;
       height: var(--errorWrapperHeight);
+      border-radius: 4px;
+      top: -100%;
+
+      &.isErrorReady {
+        top: calc((100% / 2) - (var(--errorWrapperHeight) / 2));
+        transition: top 1s;
+      }
     }
   }
 }
