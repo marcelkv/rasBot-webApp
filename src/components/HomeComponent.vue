@@ -35,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import SpinnerComponent from "@/common/components/SpinnerComponent.vue";
 
 export default {
@@ -50,6 +50,13 @@ export default {
 
     const canConnect = computed(() => {
       return textInput.value.length > 3;
+    });
+
+    onMounted(() => {
+      hasError.value = false;
+      canRemoveError.value = false;
+      textInput.value = "";
+      isValidating.value = false;
     });
 
     async function onClickConnect(): Promise<void> {
