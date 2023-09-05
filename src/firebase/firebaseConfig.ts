@@ -1,4 +1,4 @@
-const firebaseConfig = {
+let firebaseConfig = {
   apiKey: process.env.FIREBASE_API_KEY,
   authDomain: process.env.FIREBASE_AUTH_DOMAIN,
   projectId: process.env.FIREBASE_PROJECT_ID,
@@ -6,5 +6,10 @@ const firebaseConfig = {
   messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.FIREBASE_APP_ID,
 };
+
+if (process.env.NODE_ENV !== "production") {
+  //  eslint-disable-next-line
+  firebaseConfig = require("@/firebase/firebaseConfig.development").default;
+}
 
 export default firebaseConfig;
