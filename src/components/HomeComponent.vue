@@ -1,5 +1,5 @@
 <template>
-  <div class="homeComponent" v-on:click="onClickHome()">
+  <div class="homeComponent" v-on:click="onClickHome">
     <div class="imageSection">
       <img class="image" alt="Vue logo" src="./../assets/logo.png" />
     </div>
@@ -10,13 +10,17 @@
         type="text"
         id="robotId"
         v-model="textInput"
-        v-on:keyup.enter="onClickConnect()"
+        v-on:keyup.enter="onClickConnect"
+        v-on:keyup.tab="onTab"
         placeholder="Robot ID"
       />
       <div
+        tabindex="0"
+        ref="connectButton"
         class="submitButton inputSection"
         v-bind:class="{ canConnect: canConnect }"
-        v-on:click="onClickConnect()"
+        v-on:click="onClickConnect"
+        v-on:keyup.enter="onClickConnect"
       >
         <div v-if="!isValidating" class="connectMsg">Connect</div>
         <SpinnerComponent
@@ -88,6 +92,7 @@ export default {
     const canRemoveError = ref(false);
     const textInput = ref("");
     const isValidating = ref(false);
+    const connectButton = ref(null);
 
     const clientService = inject<IClientService>("clientService");
 
@@ -101,6 +106,15 @@ export default {
       textInput.value = "";
       isValidating.value = false;
     });
+
+    function onTab(event: KeyboardEvent): void {
+      if (!canConnect.value || event?.key !== "Tab") {
+        return;
+      }
+
+      event.preventDefault();
+      connectButton.value?.focus();
+    }
 
     async function onClickConnect(): Promise<void> {
       if (!canConnect.value) {
@@ -153,6 +167,7 @@ export default {
       textInput,
       canConnect,
       isValidating,
+      onTab,
       onClickConnect,
       onClickHome,
     };
