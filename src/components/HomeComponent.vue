@@ -10,6 +10,7 @@
         type="text"
         id="robotId"
         v-model="textInput"
+        v-on:keyup.enter="onClickConnect()"
         placeholder="Robot ID"
       />
       <div
@@ -91,7 +92,7 @@ export default {
     const clientService = inject<IClientService>("clientService");
 
     const canConnect = computed(() => {
-      return textInput.value.length > 3;
+      return textInput.value.length === 4;
     });
 
     onMounted(() => {

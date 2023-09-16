@@ -28,19 +28,6 @@ export class ClientService implements IClientService {
     });
     const rasBotData = rasBotInDb?.data() as IRasBot;
 
-    if (rasBotData) {
-      const date = this._getDate(rasBotData);
-      const currentDate = new Date();
-      return date < currentDate;
-    }
-
-    return false;
-  }
-
-  private _getDate(rasBot: IRasBot): Date {
-    const seconds = rasBot.timeStamp.seconds;
-    const nanoseconds = rasBot.timeStamp.nanoseconds;
-    const milliseconds = seconds * 1000 + nanoseconds / 1000000;
-    return new Date(milliseconds);
+    return !!rasBotData;
   }
 }
