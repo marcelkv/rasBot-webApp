@@ -7,8 +7,7 @@ import {
   Firestore,
 } from "firebase/firestore";
 import { IRasBot } from "@/common/services/IRasBot.interface";
-import productionConfig from "@/firebase/firebaseConfig";
-import developmentConfig from "@/firebase/firebaseConfig.development";
+import firebaseConfig from "@/firebase/firebaseConfig";
 
 export class ClientService implements IClientService {
   private readonly _firebaseApp: FirebaseApp = null;
@@ -16,8 +15,6 @@ export class ClientService implements IClientService {
   private readonly _rasBotCol;
 
   constructor() {
-    const isProduction = process.env.NODE_ENV === "production";
-    const firebaseConfig = isProduction ? productionConfig : developmentConfig;
     this._firebaseApp = initializeApp(firebaseConfig);
     this._firestore = getFirestore(this._firebaseApp);
     this._rasBotCol = collection(this._firestore, "rasBots");
