@@ -1,3 +1,4 @@
 export interface IClientService {
-  isRobotIdValidAsync(robotId: string): Promise<boolean>;
+  get isConnected(): boolean;
+  connectRobotAsync(robotId: string): Promise<boolean>;
 }

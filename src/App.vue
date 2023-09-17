@@ -1,10 +1,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
-import LoginComponent from "@/components/LoginComponent.vue";
 
 export default defineComponent({
   name: "App",
-  components: { LoginComponent },
   beforeCreate() {
     document.title = "RasBot";
   },
@@ -12,7 +10,7 @@ export default defineComponent({
 </script>
 
 <template>
-  <LoginComponent></LoginComponent>
+  <router-view></router-view>
 </template>
 
 <style>

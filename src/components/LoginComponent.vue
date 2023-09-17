@@ -1,3 +1,105 @@
+<script lang="ts">
+import { computed, inject, onMounted, ref } from "vue";
+import SpinnerComponent from "@/common/components/SpinnerComponent.vue";
+import { IClientService } from "@/common/services/IClientService";
+import { useRouter } from "vue-router";
+
+export default {
+  components: {
+    SpinnerComponent,
+  },
+  setup() {
+    const hasError = ref(false);
+    const hasInternetConnectionError = ref(false);
+    const canRemoveError = ref(false);
+    const textInput = ref("");
+    const isValidating = ref(false);
+    const connectButton = ref(null);
+
+    const clientService = inject<IClientService>("clientService");
+    const router = useRouter();
+
+    const canConnect = computed(() => {
+      return textInput.value.length === 4;
+    });
+
+    onMounted(() => {
+      hasError.value = false;
+      canRemoveError.value = false;
+      textInput.value = "";
+      isValidating.value = false;
+    });
+
+    function onTab(event: KeyboardEvent): void {
+      if (!canConnect.value || event?.key !== "Tab") {
+        return;
+      }
+
+      event.preventDefault();
+      connectButton.value?.focus();
+    }
+
+    async function onClickConnect(): Promise<void> {
+      if (!canConnect.value) {
+        return;
+      }
+
+      const isRobotIdValid = await isRobotIdValidAsync();
+
+      if (!isRobotIdValid) {
+        setStateForInvalidRobotId();
+        return;
+      }
+
+      await router.push({ name: "Home" });
+    }
+
+    async function isRobotIdValidAsync(): Promise<boolean> {
+      isValidating.value = true;
+      hasInternetConnectionError.value = false;
+      let isRobotIdValid = false;
+
+      try {
+        isRobotIdValid = await clientService?.connectRobotAsync(
+          textInput.value
+        );
+      } catch (e) {
+        hasInternetConnectionError.value = true;
+      }
+
+      isValidating.value = false;
+      return isRobotIdValid;
+    }
+
+    function setStateForInvalidRobotId(): void {
+      hasError.value = true;
+      setTimeout(() => (canRemoveError.value = true), 200);
+    }
+
+    function onClickLoginComponent(): void {
+      if (!hasError.value || !canRemoveError.value) {
+        return;
+      }
+
+      hasError.value = false;
+      canRemoveError.value = false;
+    }
+
+    return {
+      hasError,
+      hasInternetConnectionError,
+      canRemoveError,
+      textInput,
+      canConnect,
+      isValidating,
+      onTab,
+      onClickConnect,
+      onClickLoginComponent,
+    };
+  },
+};
+</script>
+
 <template>
   <div class="loginComponent" v-on:click="onClickLoginComponent">
     <div class="imageSection">
@@ -76,104 +178,6 @@
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { computed, inject, onMounted, ref } from "vue";
-import SpinnerComponent from "@/common/components/SpinnerComponent.vue";
-import { IClientService } from "@/common/services/IClientService";
-
-export default {
-  components: {
-    SpinnerComponent,
-  },
-  setup() {
-    const hasError = ref(false);
-    const hasInternetConnectionError = ref(false);
-    const canRemoveError = ref(false);
-    const textInput = ref("");
-    const isValidating = ref(false);
-    const connectButton = ref(null);
-
-    const clientService = inject<IClientService>("clientService");
-
-    const canConnect = computed(() => {
-      return textInput.value.length === 4;
-    });
-
-    onMounted(() => {
-      hasError.value = false;
-      canRemoveError.value = false;
-      textInput.value = "";
-      isValidating.value = false;
-    });
-
-    function onTab(event: KeyboardEvent): void {
-      if (!canConnect.value || event?.key !== "Tab") {
-        return;
-      }
-
-      event.preventDefault();
-      connectButton.value?.focus();
-    }
-
-    async function onClickConnect(): Promise<void> {
-      if (!canConnect.value) {
-        return;
-      }
-
-      const isRobotIdValid = await isRobotIdValidAsync();
-
-      if (!isRobotIdValid) {
-        setStateForInvalidRobotId();
-        return;
-      }
-    }
-
-    async function isRobotIdValidAsync(): Promise<boolean> {
-      isValidating.value = true;
-      hasInternetConnectionError.value = false;
-      let isRobotIdValid = false;
-
-      try {
-        isRobotIdValid = await clientService?.isRobotIdValidAsync(
-          textInput.value
-        );
-      } catch (e) {
-        hasInternetConnectionError.value = true;
-      }
-
-      isValidating.value = false;
-      return isRobotIdValid;
-    }
-
-    function setStateForInvalidRobotId(): void {
-      hasError.value = true;
-      setTimeout(() => (canRemoveError.value = true), 200);
-    }
-
-    function onClickLoginComponent(): void {
-      if (!hasError.value || !canRemoveError.value) {
-        return;
-      }
-
-      hasError.value = false;
-      canRemoveError.value = false;
-    }
-
-    return {
-      hasError,
-      hasInternetConnectionError,
-      canRemoveError,
-      textInput,
-      canConnect,
-      isValidating,
-      onTab,
-      onClickConnect,
-      onClickLoginComponent,
-    };
-  },
-};
-</script>
 
 <style lang="less" scoped>
 .loginComponent {

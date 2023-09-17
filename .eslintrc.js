@@ -27,4 +27,14 @@ module.exports = {
       },
     },
   ],
+  settings: {
+    "import/resolver": {
+      alias: {
+        map: [
+          ["@", "./src"], // Define your alias here
+        ],
+        extensions: [".js", ".jsx", ".ts", ".tsx", ".vue"], // Include appropriate file extensions
+      },
+    },
+  },
 };

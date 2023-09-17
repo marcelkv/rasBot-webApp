@@ -13,6 +13,7 @@ export class ClientService implements IClientService {
   private readonly _firebaseApp: FirebaseApp = null;
   private readonly _firestore: Firestore;
   private readonly _rasBotCol;
+  private _robotId: string = null;
 
   constructor() {
     this._firebaseApp = initializeApp(firebaseConfig);
@@ -20,14 +21,23 @@ export class ClientService implements IClientService {
     this._rasBotCol = collection(this._firestore, "rasBots");
   }
 
-  async isRobotIdValidAsync(robotId: string): Promise<boolean> {
+  get isConnected(): boolean {
+    return !!this._robotId;
+  }
+
+  async connectRobotAsync(robotId: string): Promise<boolean> {
     const rasBotSnapshot = await getDocs(this._rasBotCol);
     const rasBotInDb = rasBotSnapshot.docs.find((doc) => {
       const data = doc.data();
       return data.rasBotId === robotId;
     });
     const rasBotData = rasBotInDb?.data() as IRasBot;
+    if (rasBotData) {
+      this._robotId = rasBotData.rasBotId;
+    } else {
+      this._robotId = null;
+    }
 
-    return !!rasBotData;
+    return this.isConnected;
   }
 }
