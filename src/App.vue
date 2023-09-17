@@ -1,19 +1,19 @@
-<template>
-  <HomeComponent></HomeComponent>
-</template>
-
 <script lang="ts">
 import { defineComponent } from "vue";
-import HomeComponent from "./components/HomeComponent.vue";
+import LoginComponent from "@/components/LoginComponent.vue";
 
 export default defineComponent({
   name: "App",
-  components: { HomeComponent },
+  components: { LoginComponent },
   beforeCreate() {
     document.title = "RasBot";
   },
 });
 </script>
+
+<template>
+  <LoginComponent></LoginComponent>
+</template>
 
 <style>
 html,

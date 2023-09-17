@@ -1,5 +1,5 @@
 <template>
-  <div class="homeComponent" v-on:click="onClickHome">
+  <div class="loginComponent" v-on:click="onClickLoginComponent">
     <div class="imageSection">
       <img class="image" alt="Vue logo" src="./../assets/logo.png" />
     </div>
@@ -151,7 +151,7 @@ export default {
       setTimeout(() => (canRemoveError.value = true), 200);
     }
 
-    function onClickHome(): void {
+    function onClickLoginComponent(): void {
       if (!hasError.value || !canRemoveError.value) {
         return;
       }
@@ -169,14 +169,14 @@ export default {
       isValidating,
       onTab,
       onClickConnect,
-      onClickHome,
+      onClickLoginComponent,
     };
   },
 };
 </script>
 
 <style lang="less" scoped>
-.homeComponent {
+.loginComponent {
   position: relative;
   display: flex;
   flex-direction: column;
