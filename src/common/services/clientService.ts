@@ -21,11 +21,11 @@ export class ClientService implements IClientService {
     this._rasBotCol = collection(this._firestore, "rasBots");
   }
 
-  get isConnected(): boolean {
+  get isLoggedIn(): boolean {
     return !!this._robotId;
   }
 
-  async connectRobotAsync(robotId: string): Promise<boolean> {
+  async logInAsync(robotId: string): Promise<boolean> {
     const rasBotSnapshot = await getDocs(this._rasBotCol);
     const rasBotInDb = rasBotSnapshot.docs.find((doc) => {
       const data = doc.data();
@@ -38,6 +38,10 @@ export class ClientService implements IClientService {
       this._robotId = null;
     }
 
-    return this.isConnected;
+    return this.isLoggedIn;
+  }
+
+  logOut(): void {
+    this._robotId = null;
   }
 }

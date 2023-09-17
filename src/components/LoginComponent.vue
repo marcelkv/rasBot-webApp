@@ -60,9 +60,7 @@ export default {
       let isRobotIdValid = false;
 
       try {
-        isRobotIdValid = await clientService?.connectRobotAsync(
-          textInput.value
-        );
+        isRobotIdValid = await clientService?.logInAsync(textInput.value);
       } catch (e) {
         hasInternetConnectionError.value = true;
       }

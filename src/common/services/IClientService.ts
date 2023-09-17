@@ -1,4 +1,5 @@
 export interface IClientService {
-  get isConnected(): boolean;
-  connectRobotAsync(robotId: string): Promise<boolean>;
+  get isLoggedIn(): boolean;
+  logInAsync(robotId: string): Promise<boolean>;
+  logOut(): void;
 }

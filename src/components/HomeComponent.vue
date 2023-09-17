@@ -1,39 +1,29 @@
 <script lang="ts">
-import { IClientService } from "@/common/services/IClientService";
-import { inject, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import HeaderComponent from "@/components/HeaderComponent.vue";
+import JoyStickComponent from "@/components/JoyStickComponent.vue";
 
 export default {
+  components: { JoyStickComponent, HeaderComponent },
   setup() {
-    const clientService = inject<IClientService>("clientService");
-    const router = useRouter();
-
-    onMounted(() => isConnected());
-
-    function isConnected(): void {
-      if (!clientService.isConnected) {
-        router.push({ name: "Connect" });
-      }
-    }
     return {};
   },
 };
 </script>
 
 <template>
-  <div class="homeComponent">
-    <div>Hi!</div>
+  <div class="home">
+    <HeaderComponent></HeaderComponent>
+    <JoyStickComponent></JoyStickComponent>
   </div>
 </template>
 
 <style scoped lang="less">
-.homeComponent {
+.home {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
-  color: white;
   height: 100%;
+  width: 100%;
 }
 </style>
