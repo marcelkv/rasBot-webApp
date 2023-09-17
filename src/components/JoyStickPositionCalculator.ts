@@ -41,11 +41,16 @@ export class JoyStickPositionCalculator {
       left = Math.cos(angle) * (this._outerRadius - this._innerRadius - 100);
       top = Math.sin(angle) * (this._outerRadius - this._innerRadius - 100);
     }
-
+    left = this._roundToTwoDecimals(left);
+    top = this._roundToTwoDecimals(top) * -1;
     return new JoyStickPosition(left, top);
   }
 
-  _isPointerInside(distance: number): boolean {
+  private _isPointerInside(distance: number): boolean {
     return distance + 100 <= this._outerRadius - this._innerRadius;
+  }
+
+  private _roundToTwoDecimals(number: number): number {
+    return parseFloat(number.toFixed(2));
   }
 }

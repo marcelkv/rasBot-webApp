@@ -1,6 +1,7 @@
 <script lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, inject, onBeforeUnmount, ref } from "vue";
 import { JoyStickPositionCalculator } from "@/components/JoyStickPositionCalculator";
+import { IClientService } from "@/common/services/IClientService";
 
 export default {
   setup() {
@@ -10,6 +11,7 @@ export default {
     const left = ref(0);
     const top = ref(0);
     let joyStickPosition: JoyStickPositionCalculator = null;
+    const clientService = inject<IClientService>("clientService");
 
     onBeforeUnmount(() => {
       removeEvents();
@@ -103,6 +105,7 @@ export default {
       const position = joyStickPosition.getPosition(x, y);
       left.value = position.left;
       top.value = position.top;
+      clientService.setPosition(left.value, top.value);
     }
 
     return {
@@ -169,7 +172,7 @@ export default {
       height: var(--innerWidth);
       border-radius: 1000px;
       left: calc(50% - var(--innerWidth) / 2 + var(--left));
-      top: calc(50% - var(--innerWidth) / 2 + var(--top));
+      top: calc(50% - var(--innerWidth) / 2 - var(--top));
     }
   }
 }
