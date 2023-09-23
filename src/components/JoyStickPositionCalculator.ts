@@ -45,11 +45,11 @@ export class JoyStickPositionCalculator {
       left = Math.cos(angle) * this.maxBorder;
       top = Math.sin(angle) * this.maxBorder;
     }
-    left = this._roundToTwoDecimals(left);
-    top = this._roundToTwoDecimals(top) * -1;
+    left = this._roundDecimals(left);
+    top = this._roundDecimals(top) * -1;
 
-    const xPercent = (left / this.maxBorder) * 100;
-    const yPercent = (top / this.maxBorder) * 100;
+    const xPercent = this._roundDecimals((left / this.maxBorder) * 100);
+    const yPercent = this._roundDecimals((top / this.maxBorder) * 100);
 
     return new JoyStickPosition(left, top, xPercent, yPercent);
   }
@@ -58,7 +58,7 @@ export class JoyStickPositionCalculator {
     return distance <= this.maxBorder;
   }
 
-  private _roundToTwoDecimals(number: number): number {
+  private _roundDecimals(number: number): number {
     return parseFloat(number.toFixed(this._numberOfDecimals));
   }
 }
