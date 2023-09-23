@@ -3,10 +3,10 @@ import { computed, inject, onBeforeUnmount, ref } from "vue";
 import { JoyStickPositionCalculator } from "@/components/JoyStickPositionCalculator";
 import { IClientService } from "@/common/services/IClientService";
 import { JoyStickPosition } from "@/components/JoyStickPosition";
+import { RasBotSettings } from "@/common/services/RasBotSettings";
 
 export default {
   setup() {
-    const percentOffset = 25;
     const ref_joyStickOut = ref(null);
     const ref_joyStickIn = ref(null);
     const isJoyStickActive = ref(false);
@@ -17,6 +17,7 @@ export default {
     const clientService = inject<IClientService>("clientService");
     let isTouch = false;
     let touchTimeoutId: number;
+    const settings = clientService.settings ?? new RasBotSettings();
 
     onBeforeUnmount(() => {
       removeEvents();
@@ -26,6 +27,11 @@ export default {
       return {
         "--left": left.value + "px",
         "--top": top.value + "px",
+        "--outerWidth": settings.outerDiameter + "px",
+        "--innerWidth": settings.innerDiameter + "px",
+        "--outerBorderColor": settings.outerBorderColor,
+        "--outerColor": settings.outerColor,
+        "--innerColor": settings.innerColor,
       };
     });
 
@@ -152,8 +158,8 @@ export default {
       }
 
       return (
-        Math.abs(x - lastPosition.xPercent) < percentOffset &&
-        Math.abs(y - lastPosition.yPercent) < percentOffset
+        Math.abs(x - lastPosition.xPercent) < settings.joyStickPercentOffset &&
+        Math.abs(y - lastPosition.yPercent) < settings.joyStickPercentOffset
       );
     }
 
@@ -201,6 +207,9 @@ export default {
   .circleOut {
     --outerWidth: 300px;
     --innerWidth: 100px;
+    --outerBorderColor: white;
+    --outerColor: #242625;
+    --innerColor: white;
     --left: 0px;
     --top: 0px;
     position: relative;
@@ -208,7 +217,8 @@ export default {
     align-items: center;
     justify-content: center;
     border-radius: 10000px;
-    border: 8px solid white;
+    border: 8px solid var(--outerBorderColor);
+    background-color: var(--outerColor);
     min-width: var(--outerWidth);
     min-height: var(--outerWidth);
     max-width: var(--outerWidth);
@@ -216,7 +226,7 @@ export default {
 
     .circleIn {
       position: absolute;
-      background-color: white;
+      background-color: var(--innerColor);
       width: var(--innerWidth);
       height: var(--innerWidth);
       border-radius: 1000px;
