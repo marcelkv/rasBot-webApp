@@ -1,32 +1,36 @@
 import { JoyStickPosition } from "@/components/JoyStickPosition";
 
 export class JoyStickPositionCalculator {
-  _outerRadius: number;
-  _innerRadius: number;
-  _centerX: number;
-  _centerY: number;
+  private _outerDiameter: number;
+  private _innerDiameter: number;
+  private _centerX: number;
+  private _centerY: number;
+  private readonly _numberOfDecimals = 0;
+  private readonly _borderOffset = 0.4;
+
+  get maxBorder(): number {
+    return this._outerDiameter / 2 - this._innerDiameter * this._borderOffset;
+  }
 
   constructor(
-    outerRadius: number,
-    innerRadius: number,
+    outerDiameter: number,
+    innerDiameter: number,
     outerTop: number,
-    outerLeft: number,
-    outerSize: number
+    outerLeft: number
   ) {
-    this.init(outerRadius, innerRadius, outerTop, outerLeft, outerSize);
+    this.init(outerDiameter, innerDiameter, outerTop, outerLeft);
   }
 
   init(
-    outerRadius: number,
-    innerRadius: number,
+    outerDiameter: number,
+    innerDiameter: number,
     outerTop: number,
-    outerLeft: number,
-    outerSize: number
+    outerLeft: number
   ) {
-    this._outerRadius = outerRadius;
-    this._innerRadius = innerRadius;
-    this._centerX = outerLeft + outerSize / 2;
-    this._centerY = outerTop + outerSize / 2;
+    this._outerDiameter = outerDiameter;
+    this._innerDiameter = innerDiameter;
+    this._centerX = outerLeft + outerDiameter / 2;
+    this._centerY = outerTop + outerDiameter / 2;
   }
 
   getPosition(realX: number, realY: number): JoyStickPosition {
@@ -38,19 +42,23 @@ export class JoyStickPositionCalculator {
 
     if (!this._isPointerInside(distance)) {
       const angle = Math.atan2(deltaY, deltaX);
-      left = Math.cos(angle) * (this._outerRadius - this._innerRadius - 100);
-      top = Math.sin(angle) * (this._outerRadius - this._innerRadius - 100);
+      left = Math.cos(angle) * this.maxBorder;
+      top = Math.sin(angle) * this.maxBorder;
     }
     left = this._roundToTwoDecimals(left);
     top = this._roundToTwoDecimals(top) * -1;
-    return new JoyStickPosition(left, top);
+
+    const xPercent = Math.min(100, Math.max(-100, left));
+    const yPercent = Math.min(100, Math.max(-100, top));
+
+    return new JoyStickPosition(left, top, xPercent, yPercent);
   }
 
   private _isPointerInside(distance: number): boolean {
-    return distance + 100 <= this._outerRadius - this._innerRadius;
+    return distance <= this.maxBorder;
   }
 
   private _roundToTwoDecimals(number: number): number {
-    return parseFloat(number.toFixed(2));
+    return parseFloat(number.toFixed(this._numberOfDecimals));
   }
 }

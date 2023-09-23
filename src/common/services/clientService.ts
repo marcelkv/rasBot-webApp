@@ -11,6 +11,7 @@ import {
 import { IRasBot } from "@/common/services/IRasBot.interface";
 import firebaseConfig from "@/firebase/firebaseConfig";
 import { serverTimestamp } from "firebase/firestore";
+import { throttle } from "lodash";
 
 export class ClientService implements IClientService {
   private readonly _firebaseApp: FirebaseApp = null;
@@ -18,7 +19,7 @@ export class ClientService implements IClientService {
   private readonly _rasBotCol;
   private _robotId: string = null;
   private _rasBotDocId: string = null;
-  private _isThrottled = false;
+  private _throttleTime = 800;
 
   constructor() {
     this._firebaseApp = initializeApp(firebaseConfig);
@@ -52,24 +53,27 @@ export class ClientService implements IClientService {
     this._rasBotDocId = null;
   }
 
-  setPosition(x: number, y: number): void {
+  async setPositionAsync(x: number, y: number): Promise<void> {
+    this.setPositionThrottled.cancel();
+    await this._setPositionAsync(x, y);
+  }
+
+  private async _setPositionAsync(x: number, y: number): Promise<void> {
     if (!this.isLoggedIn) {
       return;
     }
 
-    if (this._isThrottled) {
-      return;
-    }
-
-    this._isThrottled = true;
-    setTimeout(() => (this._isThrottled = false), 400);
-    setTimeout(async () => {
+    try {
       const rasBotDocRef = doc(this._firestore, "rasBots", this._rasBotDocId);
       await updateDoc(rasBotDocRef, {
         x: x,
         y: y,
         timeStamp: serverTimestamp(),
       });
-    }, 0);
+    } catch (e) {
+      return;
+    }
   }
+
+  setPositionThrottled = throttle(this._setPositionAsync, this._throttleTime);
 }

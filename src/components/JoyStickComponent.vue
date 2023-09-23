@@ -2,16 +2,21 @@
 import { computed, inject, onBeforeUnmount, ref } from "vue";
 import { JoyStickPositionCalculator } from "@/components/JoyStickPositionCalculator";
 import { IClientService } from "@/common/services/IClientService";
+import { JoyStickPosition } from "@/components/JoyStickPosition";
 
 export default {
   setup() {
+    const percentOffset = 25;
     const ref_joyStickOut = ref(null);
     const ref_joyStickIn = ref(null);
     const isJoyStickActive = ref(false);
     const left = ref(0);
     const top = ref(0);
     let joyStickPosition: JoyStickPositionCalculator = null;
+    let lastPosition: JoyStickPosition;
     const clientService = inject<IClientService>("clientService");
+    let isTouch = false;
+    let touchTimeoutId: number;
 
     onBeforeUnmount(() => {
       removeEvents();
@@ -25,6 +30,7 @@ export default {
     });
 
     function onTouchStart(event: TouchEvent): void {
+      setIsTouch();
       onPointerDown(
         event.changedTouches[0].clientX,
         event.changedTouches[0].clientY
@@ -32,6 +38,10 @@ export default {
     }
 
     function onMouseDown(event: MouseEvent): void {
+      if (isTouch) {
+        return;
+      }
+
       onPointerDown(event.clientX, event.clientY);
     }
 
@@ -39,10 +49,11 @@ export default {
       isJoyStickActive.value = true;
       initJoyStick();
       addEvents();
-      setJoyStickPosition(x, y);
+      setJoyStickPositionThrottled(x, y);
     }
 
     function onTouchMove(event: TouchEvent): void {
+      setIsTouch();
       onPointerMove(
         event.changedTouches[0].clientX,
         event.changedTouches[0].clientY
@@ -50,6 +61,10 @@ export default {
     }
 
     function onMouseMove(event: MouseEvent): void {
+      if (isTouch) {
+        return;
+      }
+
       onPointerMove(event.clientX, event.clientY);
     }
 
@@ -58,14 +73,21 @@ export default {
         return;
       }
 
-      setJoyStickPosition(x, y);
+      setJoyStickPositionThrottled(x, y);
     }
 
-    function onPointerUp(): void {
+    async function onPointerUp(): Promise<void> {
       isJoyStickActive.value = false;
+      removeEvents();
       left.value = 0;
       top.value = 0;
-      removeEvents();
+
+      if (isSameCoordinatePosition(0, 0)) {
+        return;
+      }
+
+      lastPosition = new JoyStickPosition();
+      await clientService.setPositionAsync(0, 0);
     }
 
     function initJoyStick(): void {
@@ -81,9 +103,14 @@ export default {
         rectOut.width,
         rectIn.width,
         rectOut.top,
-        rectOut.left,
-        rectOut.width
+        rectOut.left
       );
+    }
+
+    function setIsTouch(): void {
+      isTouch = true;
+      clearTimeout(touchTimeoutId);
+      touchTimeoutId = setTimeout(() => (isTouch = false), 500);
     }
 
     function addEvents(): void {
@@ -101,11 +128,33 @@ export default {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onPointerUp);
     }
-    function setJoyStickPosition(x: number, y: number): void {
+
+    function setJoyStickPositionThrottled(x: number, y: number): void {
       const position = joyStickPosition.getPosition(x, y);
       left.value = position.left;
       top.value = position.top;
-      clientService.setPosition(left.value, top.value);
+
+      if (isSameCoordinatePosition(position.xPercent, position.yPercent)) {
+        return;
+      }
+
+      lastPosition = position;
+      clientService.setPositionThrottled(position.xPercent, position.yPercent);
+    }
+
+    function isSameCoordinatePosition(x: number, y: number): boolean {
+      if (!lastPosition) {
+        return false;
+      }
+
+      if (x === lastPosition.xPercent && y === lastPosition.yPercent) {
+        return true;
+      }
+
+      return (
+        Math.abs(x - lastPosition.xPercent) < percentOffset &&
+        Math.abs(y - lastPosition.yPercent) < percentOffset
+      );
     }
 
     return {
